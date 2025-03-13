@@ -1,5 +1,6 @@
 package esgi.fyc.use_case;
 
+import esgi.fyc.model.kycStatus.KycStatus;
 import esgi.fyc.model.player.Player;
 import esgi.fyc.model.player.PlayerRepository;
 import esgi.fyc.model.playerId.PlayerId;
@@ -35,11 +36,11 @@ class WithdrawUseCaseTest {
       player.verifyKyc();
       when(playerRepository.find(playerId)).thenReturn(player);
 
-      withdrawUseCase.execute(playerId, BigDecimal.valueOf(500));
+      withdrawUseCase.execute(playerId, BigDecimal.valueOf(1000));
 
-      assertEquals(BigDecimal.valueOf(1500), player.getBalance(),
-                   "Le solde devrait être 2000 - 500 = 1500");
-      assertEquals(BigDecimal.valueOf(500), player.getDailyWithdrawal(LocalDate.now()));
+      assertEquals(BigDecimal.valueOf(1000), player.getBalance(),
+                   "Le solde devrait être 2000 - 1000 = 1000");
+      assertEquals(BigDecimal.valueOf(1000), player.getDailyWithdrawal(LocalDate.now()));
       verify(playerRepository).save(player);
    }
 
@@ -113,7 +114,7 @@ class WithdrawUseCaseTest {
    }
 
    @Test
-   void testWithdrawOver2000WithoutKyc() {
+   void testWithdrawOverKycThresholdWithoutKyc() {
       PlayerId playerId = PlayerId.of("6789");
       Player player = new Player(playerId, BigDecimal.valueOf(3000));
       when(playerRepository.find(playerId)).thenReturn(player);
@@ -122,13 +123,27 @@ class WithdrawUseCaseTest {
             DomainException.class,
             () -> withdrawUseCase.execute(playerId, BigDecimal.valueOf(2500))
                                        );
-      assertTrue(ex.getMessage().contains("Retrait supérieur à 2000€, vérification KYC requise."));
+      assertTrue(ex.getMessage().contains("vérification KYC requise."));
       verify(playerRepository, never()).save(any(Player.class));
    }
 
    @Test
-   void testWithdrawWithActiveBonus() {
+   void testWithdrawUnderKycThresholdWithoutKyc() {
       PlayerId playerId = PlayerId.of("7890");
+      Player player = new Player(playerId, BigDecimal.valueOf(2500));
+      when(playerRepository.find(playerId)).thenReturn(player);
+
+      withdrawUseCase.execute(playerId, BigDecimal.valueOf(500));
+
+      assertEquals(BigDecimal.valueOf(2000), player.getBalance(),
+              "Le solde devrait être 2500 - 500 = 2000");
+      assertEquals(BigDecimal.valueOf(500), player.getDailyWithdrawal(LocalDate.now()));
+      verify(playerRepository).save(player);
+   }
+
+   @Test
+   void testWithdrawWithActiveBonus() {
+      PlayerId playerId = PlayerId.of("8901");
       Player player = new Player(playerId, BigDecimal.valueOf(500));
       player.addBonus(BigDecimal.valueOf(100), BigDecimal.valueOf(50));
       when(playerRepository.find(playerId)).thenReturn(player);

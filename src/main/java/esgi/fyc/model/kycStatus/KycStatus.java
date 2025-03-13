@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 public class KycStatus {
    private final boolean isVerified;
-   private static final BigDecimal KYC_THRESHOLD = BigDecimal.valueOf(2000);
+   private static final BigDecimal KYC_THRESHOLD = BigDecimal.valueOf(500);
 
    public KycStatus(boolean isVerified) {
       this.isVerified = isVerified;
@@ -14,7 +14,7 @@ public class KycStatus {
 
    public void verify(BigDecimal amount) {
       if (amount.compareTo(KYC_THRESHOLD) > 0 && !isVerified)
-         throw new DomainException("Retrait supérieur à 2000€, vérification KYC requise.");
+         throw new DomainException("Retrait supérieur à " + KYC_THRESHOLD + "€, vérification KYC requise.");
    }
 
    public boolean isVerified() {
