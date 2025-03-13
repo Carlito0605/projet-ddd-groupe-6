@@ -10,6 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -155,4 +157,23 @@ class WithdrawUseCaseTest {
       assertTrue(ex.getMessage().contains("Bonus actif non complété"));
       verify(playerRepository, never()).save(any(Player.class));
    }
+
+   @Test
+   void testWithdrawWithBonusWageringLeft() {
+      PlayerId playerId = PlayerId.of("8901");
+      Player player = new Player(playerId, BigDecimal.valueOf(100));
+
+      player.addBonus(BigDecimal.valueOf(100), BigDecimal.valueOf(0));
+
+      when(playerRepository.find(playerId)).thenReturn(player);
+
+      withdrawUseCase.execute(playerId, BigDecimal.valueOf(100));
+
+      assertEquals(BigDecimal.valueOf(0), player.getBonusWageringLeft(),
+              "Le bonus de pari devrait être 0");
+      assertEquals(BigDecimal.valueOf(100), player.getBonusBalance());
+      verify(playerRepository).save(player);
+   }
+
+
 }
