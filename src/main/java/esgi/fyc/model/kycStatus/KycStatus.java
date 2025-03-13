@@ -21,10 +21,6 @@ public class KycStatus {
       return isVerified;
    }
 
-   public static KycStatus verified() {
-      return new KycStatus(true);
-   }
-
    public static KycStatus unverified() {
       return new KycStatus(false);
    }

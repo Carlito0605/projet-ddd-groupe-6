@@ -35,14 +35,6 @@ public class WithdrawalLimits {
       monthlyWithdrawals.put(monthKey, monthlyTotal);
    }
 
-   public Map<LocalDate, BigDecimal> getDailyWithdrawals() {
-      return dailyWithdrawals;
-   }
-
-   public Map<String, BigDecimal> getMonthlyWithdrawals() {
-      return monthlyWithdrawals;
-   }
-
    public BigDecimal getDailyWithdrawal(LocalDate date) {
       return dailyWithdrawals.getOrDefault(date, BigDecimal.ZERO);
    }

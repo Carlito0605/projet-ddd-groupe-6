@@ -29,12 +29,7 @@ public class Player {
       this.bonusStatus = BonusStatus.noBonus();
    }
 
-   public PlayerId getPlayerId() { return playerId; }
    public BigDecimal getBalance() { return balance; }
-   public SuspendedStatus suspendedStatus() { return suspendedStatus; }
-   public KycStatus kycStatus() { return kycStatus; }
-   public WithdrawalLimits withdrawalLimits() { return withdrawalLimits; }
-   public BonusStatus bonusStatus() { return bonusStatus; }
 
    public void withdraw(BigDecimal amount, LocalDate date) {
       suspendedStatus.verifyNotSuspended();
@@ -97,5 +92,4 @@ public class Player {
    public BigDecimal getBonusBalance() {
       return bonusStatus.getBonusBalance();
    }
-
 }
