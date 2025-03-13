@@ -1,88 +1,101 @@
 package esgi.fyc.model.player;
 
+import esgi.fyc.model.bonusStatus.BonusStatus;
+import esgi.fyc.model.kycStatus.KycStatus;
+import esgi.fyc.model.playerId.PlayerId;
+import esgi.fyc.model.suspendedstatus.SuspendedStatus;
+import esgi.fyc.model.withdrawalLimits.WithdrawalLimits;
+import esgi.fyc.use_case.DomainException;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class Player {
-   private final String playerId;
+   private final PlayerId playerId;
    private BigDecimal balance;
-   private boolean suspended;
-   private String suspensionReason;
-   private final Map<LocalDate, BigDecimal> dailyWithdrawals;
-   private final Map<String, BigDecimal> monthlyWithdrawals;
-   private boolean kycVerified;
-   private BigDecimal bonusBalance;
-   private BigDecimal bonusWageringLeft;
 
-   public Player(String playerId, BigDecimal initialBalance) {
+   private SuspendedStatus suspendedStatus;
+   private KycStatus kycStatus;
+   private WithdrawalLimits withdrawalLimits;
+   private BonusStatus bonusStatus;
+
+   public Player(PlayerId playerId, BigDecimal initialBalance) {
       this.playerId = playerId;
       this.balance = initialBalance;
-      this.suspended = false;
-      this.suspensionReason = null;
-
-      this.dailyWithdrawals = new HashMap<>();
-      this.monthlyWithdrawals = new HashMap<>();
-
-      this.kycVerified = false;
-      this.bonusBalance = BigDecimal.ZERO;
-      this.bonusWageringLeft = BigDecimal.ZERO;
+      this.suspendedStatus = SuspendedStatus.active();
+      this.kycStatus = KycStatus.unverified();
+      this.withdrawalLimits = new WithdrawalLimits();
+      this.bonusStatus = BonusStatus.noBonus();
    }
 
-   public String getPlayerId() { return playerId; }
+   public PlayerId getPlayerId() { return playerId; }
    public BigDecimal getBalance() { return balance; }
-   public boolean isSuspended() { return suspended; }
-   public String getSuspensionReason() { return suspensionReason; }
-   public boolean isKycVerified() { return kycVerified; }
-   public BigDecimal getBonusBalance() { return bonusBalance; }
-   public BigDecimal getBonusWageringLeft() { return bonusWageringLeft; }
+   public SuspendedStatus suspendedStatus() { return suspendedStatus; }
+   public KycStatus kycStatus() { return kycStatus; }
+   public WithdrawalLimits withdrawalLimits() { return withdrawalLimits; }
+   public BonusStatus bonusStatus() { return bonusStatus; }
+
+   public void withdraw(BigDecimal amount, LocalDate date) {
+      suspendedStatus.verifyNotSuspended();
+      kycStatus.verify(amount);
+      bonusStatus.verifyBonusConditions();
+      withdrawalLimits.recordWithdrawal(amount, date);
+
+      if (balance.compareTo(amount) < 0) {
+         throw new DomainException("Solde insuffisant.");
+      }
+
+      balance = balance.subtract(amount);
+   }
+
 
    public void verifyKyc() {
-      this.kycVerified = true;
+      this.kycStatus = new KycStatus(true);
+   }
+
+   public boolean isKycVerified() {
+      return kycStatus.isVerified();
    }
 
    public void suspend(String reason) {
-      this.suspended = true;
-      this.suspensionReason = reason;
+      this.suspendedStatus = SuspendedStatus.suspended(reason);
+   }
+
+   public boolean isSuspended() {
+      return suspendedStatus.isSuspended();
+   }
+
+   public String getSuspensionReason() {
+      return suspendedStatus.getReason();
    }
 
    public void addBonus(BigDecimal bonusAmount, BigDecimal wageringRequirement) {
-      this.bonusBalance = bonusAmount;
-      this.bonusWageringLeft = wageringRequirement;
+      this.bonusStatus = new BonusStatus(bonusAmount, wageringRequirement);
    }
 
-   public void addToBalance(BigDecimal amount) {
-      this.balance = this.balance.add(amount);
-   }
-
-   public void subtractFromBalance(BigDecimal amount) {
-      this.balance = this.balance.subtract(amount);
+   public BigDecimal getBonusWageringLeft() {
+      return bonusStatus.getBonusWageringLeft();
    }
 
    public void reduceWageringRequirement(BigDecimal amountMise) {
-      this.bonusWageringLeft = this.bonusWageringLeft.subtract(amountMise);
-      if (this.bonusWageringLeft.compareTo(BigDecimal.ZERO) < 0) {
-         this.bonusWageringLeft = BigDecimal.ZERO;
-      }
+      bonusStatus = bonusStatus.reduceWagering(amountMise);
    }
-   public void recordWithdrawal(BigDecimal amount, LocalDate date) {
-      this.dailyWithdrawals.putIfAbsent(date, BigDecimal.ZERO);
-      BigDecimal dailyTotal = this.dailyWithdrawals.get(date).add(amount);
-      this.dailyWithdrawals.put(date, dailyTotal);
 
-      String yearMonth = date.getYear() + "-" + String.format("%02d", date.getMonthValue());
-      this.monthlyWithdrawals.putIfAbsent(yearMonth, BigDecimal.ZERO);
-      BigDecimal monthlyTotal = this.monthlyWithdrawals.get(yearMonth).add(amount);
-      this.monthlyWithdrawals.put(yearMonth, monthlyTotal);
+   public void recordWithdrawal(BigDecimal amount, LocalDate date) {
+      withdrawalLimits.recordWithdrawal(amount, date);
    }
 
    public BigDecimal getDailyWithdrawal(LocalDate date) {
-      return dailyWithdrawals.getOrDefault(date, BigDecimal.ZERO);
+      return withdrawalLimits.getDailyWithdrawal(date);
    }
 
-   public BigDecimal getMonthlyWithdrawal(String yearMonth) {
-      return monthlyWithdrawals.getOrDefault(yearMonth, BigDecimal.ZERO);
+   public void addToBalance(BigDecimal bigDecimal) {
+      balance = balance.add(bigDecimal);
    }
+
+   public BigDecimal getBonusBalance() {
+      return bonusStatus.getBonusBalance();
+   }
+
 }

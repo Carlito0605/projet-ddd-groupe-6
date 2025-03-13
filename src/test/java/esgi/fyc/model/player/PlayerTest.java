@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 
+import esgi.fyc.model.playerId.PlayerId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +14,7 @@ class PlayerTest {
 
    @BeforeEach
    void setUp() {
-      player = new Player("71234", BigDecimal.valueOf(500));
+      player = new Player(new PlayerId("71234"), BigDecimal.valueOf(500));
    }
 
    @Test
