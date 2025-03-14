@@ -13,7 +13,8 @@ class PlayerTest {
 
    @BeforeEach
    void setUp() {
-      player = new Player(new PlayerId("71234"), BigDecimal.valueOf(500));
+      player = new Player(new PlayerId("71234"),
+                          new Money(500, Currency.EUR));
    }
 
    @Test

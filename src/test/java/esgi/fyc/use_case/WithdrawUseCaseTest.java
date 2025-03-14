@@ -1,5 +1,7 @@
 package esgi.fyc.use_case;
 
+import esgi.fyc.model.money.Currency;
+import esgi.fyc.model.money.Money;
 import esgi.fyc.model.player.Player;
 import esgi.fyc.model.player.PlayerRepository;
 import esgi.fyc.model.player.PlayerId;
@@ -31,11 +33,14 @@ class WithdrawUseCaseTest {
    @Test
    void testWithdrawValid() {
       PlayerId playerId = PlayerId.of("1234");
-      Player player = new Player(playerId, BigDecimal.valueOf(2000));
+
+      Money initialBalance = new Money(2000, Currency.EUR);
+      Player player = new Player(playerId, initialBalance);
       player.verifyKyc();
       when(playerRepository.find(playerId)).thenReturn(player);
 
-      withdrawUseCase.execute(playerId, BigDecimal.valueOf(1000));
+      Money amount = new Money(1000, Currency.EUR);
+      withdrawUseCase.execute(playerId, amount)
 
       assertEquals(BigDecimal.valueOf(1000), player.getBalance(),
                    "Le solde devrait être 2000 - 1000 = 1000");

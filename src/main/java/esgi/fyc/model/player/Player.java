@@ -2,24 +2,24 @@ package esgi.fyc.model.player;
 
 import esgi.fyc.model.bonusStatus.BonusStatus;
 import esgi.fyc.model.kycStatus.KycStatus;
+import esgi.fyc.model.money.Money;
 import esgi.fyc.model.suspendedstatus.SuspendedStatus;
 import esgi.fyc.model.withdrawalLimits.WithdrawalLimits;
 import esgi.fyc.use_case.DomainException;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 
 public class Player {
    private final PlayerId playerId;
-   private BigDecimal balance;
+   private Money balance;
 
    private SuspendedStatus suspendedStatus;
    private KycStatus kycStatus;
    private WithdrawalLimits withdrawalLimits;
    private BonusStatus bonusStatus;
 
-   public Player(PlayerId playerId, BigDecimal initialBalance) {
+   public Player(PlayerId playerId, Money initialBalance) {
       this.playerId = playerId;
       this.balance = initialBalance;
       this.suspendedStatus = SuspendedStatus.active();
@@ -28,9 +28,9 @@ public class Player {
       this.bonusStatus = BonusStatus.noBonus();
    }
 
-   public BigDecimal getBalance() { return balance; }
+   public Money getBalance() { return balance; }
 
-   public void withdraw(BigDecimal amount, LocalDate date) {
+   public void withdraw(Money amount, LocalDate date) {
       suspendedStatus.verifyNotSuspended();
       kycStatus.verify(amount);
       bonusStatus.verifyBonusConditions();
@@ -64,31 +64,31 @@ public class Player {
       return suspendedStatus.getReason();
    }
 
-   public void addBonus(BigDecimal bonusAmount, BigDecimal wageringRequirement) {
+   public void addBonus(Money bonusAmount, Money wageringRequirement) {
       this.bonusStatus = new BonusStatus(bonusAmount, wageringRequirement);
    }
 
-   public BigDecimal getBonusWageringLeft() {
+   public Money getBonusWageringLeft() {
       return bonusStatus.getBonusWageringLeft();
    }
 
-   public void reduceWageringRequirement(BigDecimal amountMise) {
+   public void reduceWageringRequirement(Money amountMise) {
       bonusStatus = bonusStatus.reduceWagering(amountMise);
    }
 
-   public void recordWithdrawal(BigDecimal amount, LocalDate date) {
+   public void recordWithdrawal(Money amount, LocalDate date) {
       withdrawalLimits.recordWithdrawal(amount, date);
    }
 
-   public BigDecimal getDailyWithdrawal(LocalDate date) {
+   public Money getDailyWithdrawal(LocalDate date) {
       return withdrawalLimits.getDailyWithdrawal(date);
    }
 
-   public void addToBalance(BigDecimal bigDecimal) {
-      balance = balance.add(bigDecimal);
+   public void addToBalance(Money Money) {
+      balance = balance.add(Money);
    }
 
-   public BigDecimal getBonusBalance() {
+   public Money getBonusBalance() {
       return bonusStatus.getBonusBalance();
    }
 }
