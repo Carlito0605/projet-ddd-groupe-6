@@ -30,16 +30,10 @@ public class Player {
 
    public Money getBalance() { return balance; }
 
-   public void withdraw(Money amount, LocalDate date) {
-      suspendedStatus.verifyNotSuspended();
-      kycStatus.verify(amount);
-      bonusStatus.verifyBonusConditions();
-      withdrawalLimits.recordWithdrawal(amount, date);
-
+   public void withdraw(Money amount) {
       if (balance.isLowerThan(amount)) {
          throw new DomainException("Solde insuffisant.");
       }
-
       balance = balance.subtract(amount);
    }
 
@@ -91,4 +85,20 @@ public class Player {
    public Money getBonusBalance() {
       return bonusStatus.getBonusBalance();
    }
+
+   public SuspendedStatus getSuspendedStatus() {
+        return suspendedStatus;
+   }
+
+    public KycStatus getKycStatus() {
+          return kycStatus;
+    }
+
+    public WithdrawalLimits getWithdrawalLimits() {
+          return withdrawalLimits;
+    }
+
+    public BonusStatus getBonusStatus() {
+          return bonusStatus;
+    }
 }

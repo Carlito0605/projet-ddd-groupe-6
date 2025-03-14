@@ -16,7 +16,11 @@ class WithdrawUseCase {
    public void execute(String playerId, int amount) {
       Player player = playerRepository.find(playerId);
       Money money = new Money(amount, Currency.EUR);
-      player.withdraw(money, LocalDate.now());
+      player.getSuspendedStatus().verifyNotSuspended();
+      player.getKycStatus().verify(money);
+      player.getBonusStatus().verifyBonusConditions();
+      player.getWithdrawalLimits().recordWithdrawal(money, LocalDate.now());
+      player.withdraw(money);
       playerRepository.save(player);
    }
 }
