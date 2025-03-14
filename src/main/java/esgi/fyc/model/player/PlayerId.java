@@ -1,4 +1,6 @@
-package esgi.fyc.model.playerId;
+package esgi.fyc.model.player;
+
+import java.util.Objects;
 
 public final class PlayerId {
    private final String value;
@@ -12,5 +14,17 @@ public final class PlayerId {
 
    public static PlayerId of(String value) {
       return new PlayerId(value);
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof PlayerId playerId)) return false;
+      return value.equals(playerId.value);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(value);
    }
 }

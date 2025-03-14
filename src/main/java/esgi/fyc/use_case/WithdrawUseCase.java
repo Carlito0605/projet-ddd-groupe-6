@@ -2,7 +2,7 @@ package esgi.fyc.use_case;
 
 import esgi.fyc.model.player.Player;
 import esgi.fyc.model.player.PlayerRepository;
-import esgi.fyc.model.playerId.PlayerId;
+import esgi.fyc.model.player.PlayerId;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

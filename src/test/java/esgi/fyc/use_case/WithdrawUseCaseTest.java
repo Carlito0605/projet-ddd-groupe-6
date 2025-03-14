@@ -1,17 +1,14 @@
 package esgi.fyc.use_case;
 
-import esgi.fyc.model.kycStatus.KycStatus;
 import esgi.fyc.model.player.Player;
 import esgi.fyc.model.player.PlayerRepository;
-import esgi.fyc.model.playerId.PlayerId;
+import esgi.fyc.model.player.PlayerId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 

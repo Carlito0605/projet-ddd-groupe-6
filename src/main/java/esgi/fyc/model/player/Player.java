@@ -2,7 +2,6 @@ package esgi.fyc.model.player;
 
 import esgi.fyc.model.bonusStatus.BonusStatus;
 import esgi.fyc.model.kycStatus.KycStatus;
-import esgi.fyc.model.playerId.PlayerId;
 import esgi.fyc.model.suspendedstatus.SuspendedStatus;
 import esgi.fyc.model.withdrawalLimits.WithdrawalLimits;
 import esgi.fyc.use_case.DomainException;
