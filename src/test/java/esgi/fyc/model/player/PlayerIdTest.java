@@ -1,6 +1,5 @@
-package esgi.fyc.model.playerId;
+package esgi.fyc.model.player;
 
-import esgi.fyc.model.player.PlayerId;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

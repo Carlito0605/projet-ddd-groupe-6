@@ -1,41 +1,42 @@
 package esgi.fyc.model.withdrawalLimits;
 
+import esgi.fyc.model.money.Currency;
+import esgi.fyc.model.money.Money;
 import esgi.fyc.use_case.DomainException;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
 public class WithdrawalLimits {
-   private static final BigDecimal DAILY_LIMIT = BigDecimal.valueOf(1000);
-   private static final BigDecimal MONTHLY_LIMIT = BigDecimal.valueOf(5000);
+   private static final Money DAILY_LIMIT = new Money(1000, Currency.EUR);
+   private static final Money MONTHLY_LIMIT = new Money(5000, Currency.EUR);
 
-   private final Map<LocalDate, BigDecimal> dailyWithdrawals;
-   private final Map<String, BigDecimal> monthlyWithdrawals;
+   private final Map<LocalDate, Money> dailyWithdrawals;
+   private final Map<String, Money> monthlyWithdrawals;
 
    public WithdrawalLimits() {
       this.dailyWithdrawals = new HashMap<>();
       this.monthlyWithdrawals = new HashMap<>();
    }
 
-   public void recordWithdrawal(BigDecimal amount, LocalDate date) {
-      BigDecimal dailyTotal = dailyWithdrawals.getOrDefault(date, BigDecimal.ZERO).add(amount);
-      if (dailyTotal.compareTo(DAILY_LIMIT) > 0) {
-         throw new DomainException("Limite journalière dépassée : " + DAILY_LIMIT + "€");
+   public void recordWithdrawal(Money amount, LocalDate date) {
+      Money dailyTotal = dailyWithdrawals.getOrDefault(date, Money.ZERO).add(amount);
+      if (dailyTotal.isUpperThan(DAILY_LIMIT)) {
+         throw new DomainException("Limite journalière dépassée : " + DAILY_LIMIT);
       }
 
       String monthKey = date.getYear() + "-" + date.getMonthValue();
-      BigDecimal monthlyTotal = monthlyWithdrawals.getOrDefault(monthKey, BigDecimal.ZERO).add(amount);
-      if (monthlyTotal.compareTo(MONTHLY_LIMIT) > 0) {
-         throw new DomainException("Limite mensuelle dépassée : " + MONTHLY_LIMIT + "€");
+      Money monthlyTotal = monthlyWithdrawals.getOrDefault(monthKey, Money.ZERO).add(amount);
+      if (monthlyTotal.isUpperThan(MONTHLY_LIMIT)) {
+         throw new DomainException("Limite mensuelle dépassée : " + MONTHLY_LIMIT);
       }
 
       dailyWithdrawals.put(date, dailyTotal);
       monthlyWithdrawals.put(monthKey, monthlyTotal);
    }
 
-   public BigDecimal getDailyWithdrawal(LocalDate date) {
-      return dailyWithdrawals.getOrDefault(date, BigDecimal.ZERO);
+   public Money getDailyWithdrawal(LocalDate date) {
+      return dailyWithdrawals.getOrDefault(date, Money.ZERO);
    }
 }

@@ -2,6 +2,6 @@ package esgi.fyc.model.player;
 
 
 public interface PlayerRepository {
-   Player find(PlayerId playerId);
+   Player find(String playerId);
    void save(Player player);
 }

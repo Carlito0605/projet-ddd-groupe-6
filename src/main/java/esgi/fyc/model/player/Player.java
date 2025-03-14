@@ -36,7 +36,7 @@ public class Player {
       bonusStatus.verifyBonusConditions();
       withdrawalLimits.recordWithdrawal(amount, date);
 
-      if (balance.compareTo(amount) < 0) {
+      if (balance.isLowerThan(amount)) {
          throw new DomainException("Solde insuffisant.");
       }
 

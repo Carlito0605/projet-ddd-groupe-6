@@ -11,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,86 +31,85 @@ class WithdrawUseCaseTest {
 
    @Test
    void testWithdrawValid() {
-      PlayerId playerId = PlayerId.of("1234");
+      String playerId = "1234";
 
       Money initialBalance = new Money(2000, Currency.EUR);
-      Player player = new Player(playerId, initialBalance);
+      Player player = new Player(PlayerId.of(playerId), initialBalance);
       player.verifyKyc();
       when(playerRepository.find(playerId)).thenReturn(player);
 
       Money amount = new Money(1000, Currency.EUR);
-      withdrawUseCase.execute(playerId, amount)
+      withdrawUseCase.execute(playerId, amount.getAmount());
 
-      assertEquals(BigDecimal.valueOf(1000), player.getBalance(),
+      assertEquals(new Money(1000, Currency.EUR), player.getBalance(),
                    "Le solde devrait être 2000 - 1000 = 1000");
-      assertEquals(BigDecimal.valueOf(1000), player.getDailyWithdrawal(LocalDate.now()));
+      assertEquals(new Money(1000, Currency.EUR), player.getDailyWithdrawal(LocalDate.now()));
       verify(playerRepository).save(player);
    }
 
    @Test
    void testWithdrawSuspendedAccount() {
-      PlayerId playerId = PlayerId.of("2345");
-      Player player = new Player(playerId, BigDecimal.valueOf(500));
+      String playerId = "2345";
+      Player player = new Player(PlayerId.of(playerId), new Money(500, Currency.EUR));
       player.suspend("Fraude détectée");
       when(playerRepository.find(playerId)).thenReturn(player);
 
       DomainException ex = assertThrows(
             DomainException.class,
-            () -> withdrawUseCase.execute(playerId, BigDecimal.valueOf(100))
-                                       );
+            () -> withdrawUseCase.execute(playerId, 100)
+      );
       assertTrue(ex.getMessage().contains("Le compte du joueur est suspendu"));
       verify(playerRepository, never()).save(any(Player.class));
    }
 
    @Test
    void testWithdrawInsufficientBalance() {
-      PlayerId playerId = PlayerId.of("3456");
-      Player player = new Player(playerId, BigDecimal.valueOf(100));
+      String playerId = "3456";
+      Player player = new Player(PlayerId.of(playerId), new Money(100, Currency.EUR));
       when(playerRepository.find(playerId)).thenReturn(player);
 
       DomainException ex = assertThrows(
             DomainException.class,
-            () -> withdrawUseCase.execute(playerId, BigDecimal.valueOf(200))
-                                       );
+            () -> withdrawUseCase.execute(playerId, 200)
+      );
       assertTrue(ex.getMessage().contains("Solde insuffisant"));
       verify(playerRepository, never()).save(any(Player.class));
    }
 
    @Test
    void testWithdrawDailyLimitExceeded() {
-      PlayerId playerId = PlayerId.of("4567");
-      Player player = new Player(playerId, BigDecimal.valueOf(3000));
+      String playerId = "4567";
+      Player player = new Player(PlayerId.of(playerId), new Money(3000, Currency.EUR));
       player.verifyKyc();
-      player.recordWithdrawal(BigDecimal.valueOf(900), LocalDate.now());
+      player.recordWithdrawal(new Money(900, Currency.EUR), LocalDate.now());
       when(playerRepository.find(playerId)).thenReturn(player);
 
       DomainException ex = assertThrows(
             DomainException.class,
-            () -> withdrawUseCase.execute(playerId, BigDecimal.valueOf(200))
-                                       );
+            () -> withdrawUseCase.execute(playerId, 200)
+      );
       assertTrue(ex.getMessage().contains("Limite journalière dépassée"));
       verify(playerRepository, never()).save(any(Player.class));
    }
 
    @Test
    void testWithdrawMonthlyLimitExceeded() {
-      PlayerId playerId = PlayerId.of("5678");
-      Player player = new Player(playerId, BigDecimal.valueOf(6000));
+      String playerId = "5678";
+      Player player = new Player(PlayerId.of(playerId), new Money(6000, Currency.EUR));
       player.verifyKyc();
 
       LocalDate firstDayOfMonth = LocalDate.now().withDayOfMonth(1);
-      player.recordWithdrawal(BigDecimal.valueOf(1000), firstDayOfMonth);
-      player.recordWithdrawal(BigDecimal.valueOf(1000), firstDayOfMonth.plusDays(1));
-      player.recordWithdrawal(BigDecimal.valueOf(1000), firstDayOfMonth.plusDays(2));
-      player.recordWithdrawal(BigDecimal.valueOf(1000), firstDayOfMonth.plusDays(3));
-      player.recordWithdrawal(BigDecimal.valueOf(900), firstDayOfMonth.plusDays(4));
+      Money monthlyWidrawal = new Money(1000, Currency.EUR);
+      for (int i = 0; i < 5; i++) {
+         player.recordWithdrawal(monthlyWidrawal, firstDayOfMonth.plusDays(i));
+      }
 
       when(playerRepository.find(playerId)).thenReturn(player);
 
       DomainException ex = assertThrows(
             DomainException.class,
-            () -> withdrawUseCase.execute(playerId, BigDecimal.valueOf(200)) // total : 5100€
-                                       );
+            () -> withdrawUseCase.execute(playerId, 100) // total : 5100€
+      );
 
       assertTrue(ex.getMessage().contains("Limite mensuelle dépassée"));
       verify(playerRepository, never()).save(any(Player.class));
@@ -119,63 +117,61 @@ class WithdrawUseCaseTest {
 
    @Test
    void testWithdrawOverKycThresholdWithoutKyc() {
-      PlayerId playerId = PlayerId.of("6789");
-      Player player = new Player(playerId, BigDecimal.valueOf(3000));
+      String playerId = "6789";
+      Player player = new Player(PlayerId.of(playerId), new Money(3000, Currency.EUR));
       when(playerRepository.find(playerId)).thenReturn(player);
 
       DomainException ex = assertThrows(
             DomainException.class,
-            () -> withdrawUseCase.execute(playerId, BigDecimal.valueOf(2500))
-                                       );
+            () -> withdrawUseCase.execute(playerId, 2500)
+      );
       assertTrue(ex.getMessage().contains("vérification KYC requise."));
       verify(playerRepository, never()).save(any(Player.class));
    }
 
    @Test
    void testWithdrawUnderKycThresholdWithoutKyc() {
-      PlayerId playerId = PlayerId.of("7890");
-      Player player = new Player(playerId, BigDecimal.valueOf(2500));
+      String playerId = "7890";
+      Player player = new Player(PlayerId.of(playerId), new Money(2500, Currency.EUR));
       when(playerRepository.find(playerId)).thenReturn(player);
 
-      withdrawUseCase.execute(playerId, BigDecimal.valueOf(500));
+      withdrawUseCase.execute(playerId, 500);
 
-      assertEquals(BigDecimal.valueOf(2000), player.getBalance(),
+      assertEquals(new Money(2000, Currency.EUR), player.getBalance(),
               "Le solde devrait être 2500 - 500 = 2000");
-      assertEquals(BigDecimal.valueOf(500), player.getDailyWithdrawal(LocalDate.now()));
+      assertEquals(new Money(500, Currency.EUR), player.getDailyWithdrawal(LocalDate.now()));
       verify(playerRepository).save(player);
    }
 
    @Test
    void testWithdrawWithActiveBonus() {
-      PlayerId playerId = PlayerId.of("8901");
-      Player player = new Player(playerId, BigDecimal.valueOf(500));
-      player.addBonus(BigDecimal.valueOf(100), BigDecimal.valueOf(50));
+      String playerId = "8901";
+      Player player = new Player(PlayerId.of(playerId), new Money(500, Currency.EUR));
+      player.addBonus(new Money(100, Currency.EUR), new Money(50, Currency.EUR));
       when(playerRepository.find(playerId)).thenReturn(player);
 
       DomainException ex = assertThrows(
             DomainException.class,
-            () -> withdrawUseCase.execute(playerId, BigDecimal.valueOf(100))
-                                       );
+            () -> withdrawUseCase.execute(playerId, 100)
+      );
       assertTrue(ex.getMessage().contains("Bonus actif non complété"));
       verify(playerRepository, never()).save(any(Player.class));
    }
 
    @Test
    void testWithdrawWithBonusWageringLeft() {
-      PlayerId playerId = PlayerId.of("8901");
-      Player player = new Player(playerId, BigDecimal.valueOf(100));
+      String playerId = "8901";
+      Player player = new Player(PlayerId.of(playerId), new Money(100, Currency.EUR));
 
-      player.addBonus(BigDecimal.valueOf(100), BigDecimal.valueOf(0));
+      player.addBonus(new Money(100, Currency.EUR), Money.ZERO);
 
       when(playerRepository.find(playerId)).thenReturn(player);
 
-      withdrawUseCase.execute(playerId, BigDecimal.valueOf(100));
+      withdrawUseCase.execute(playerId, 100);
 
-      assertEquals(BigDecimal.valueOf(0), player.getBonusWageringLeft(),
+      assertEquals(Money.ZERO, player.getBonusWageringLeft(),
               "Le bonus de pari devrait être 0");
-      assertEquals(BigDecimal.valueOf(100), player.getBonusBalance());
+      assertEquals(new Money(100, Currency.EUR), player.getBonusBalance());
       verify(playerRepository).save(player);
    }
-
-
 }

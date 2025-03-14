@@ -2,8 +2,8 @@ package esgi.fyc.model.player;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.math.BigDecimal;
-
+import esgi.fyc.model.money.Currency;
+import esgi.fyc.model.money.Money;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,19 +13,18 @@ class PlayerTest {
 
    @BeforeEach
    void setUp() {
-      player = new Player(new PlayerId("71234"),
-                          new Money(500, Currency.EUR));
+      player = new Player(new PlayerId("71234"), new Money(500, Currency.EUR));
    }
 
    @Test
    void testInitialBalance() {
-      assertEquals(BigDecimal.valueOf(500), player.getBalance());
+      assertEquals(new Money(500, Currency.EUR), player.getBalance());
    }
 
    @Test
    void testDeposit() {
-      player.addToBalance(BigDecimal.valueOf(200));
-      assertEquals(BigDecimal.valueOf(700), player.getBalance());
+      player.addToBalance(new Money(200, Currency.EUR));
+      assertEquals(new Money(700, Currency.EUR), player.getBalance());
    }
 
    @Test
@@ -46,18 +45,20 @@ class PlayerTest {
 
    @Test
    void testAddBonus() {
-      player.addBonus(BigDecimal.valueOf(100), BigDecimal.valueOf(200));
+      Money bonus = new Money(100, Currency.EUR);
+      Money wagering = new Money(50, Currency.EUR);
+      player.addBonus(bonus, wagering);
 
-      assertEquals(BigDecimal.valueOf(100), player.getBonusBalance());
-      assertEquals(BigDecimal.valueOf(200), player.getBonusWageringLeft());
+      assertEquals(bonus, player.getBonusBalance());
+      assertEquals(wagering, player.getBonusWageringLeft());
    }
 
    @Test
    void testReduceWageringRequirement() {
-      player.addBonus(BigDecimal.valueOf(100), BigDecimal.valueOf(50));
-      player.reduceWageringRequirement(BigDecimal.valueOf(30));
-      assertEquals(BigDecimal.valueOf(20), player.getBonusWageringLeft());
-      player.reduceWageringRequirement(BigDecimal.valueOf(25));
-      assertEquals(BigDecimal.ZERO, player.getBonusWageringLeft());
+      player.addBonus(new Money(100, Currency.EUR), new Money(50, Currency.EUR));
+      player.reduceWageringRequirement(new Money(30, Currency.EUR));
+      assertEquals(new Money(20, Currency.EUR), player.getBonusWageringLeft());
+      player.reduceWageringRequirement(new Money(25, Currency.EUR));
+      assertEquals(Money.ZERO, player.getBonusWageringLeft());
    }
 }
