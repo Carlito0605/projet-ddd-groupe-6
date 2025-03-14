@@ -1,6 +1,6 @@
 package esgi.fyc.use_case;
 
-import esgi.fyc.exception.DomainException;
+import esgi.fyc.exception.*;
 import esgi.fyc.model.money.Currency;
 import esgi.fyc.model.money.Money;
 import esgi.fyc.model.player.Player;
@@ -55,11 +55,10 @@ class WithdrawUseCaseTest {
       player.suspend("Fraude détectée");
       when(playerRepository.find(playerId)).thenReturn(player);
 
-      DomainException ex = assertThrows(
-            DomainException.class,
+      assertThrows(
+            SuspendedPlayerException.class,
             () -> withdrawUseCase.execute(playerId, 100)
       );
-      assertTrue(ex.getMessage().contains("Le compte du joueur est suspendu"));
       verify(playerRepository, never()).save(any(Player.class));
    }
 
@@ -69,11 +68,10 @@ class WithdrawUseCaseTest {
       Player player = new Player(PlayerId.of(playerId), new Money(100, Currency.EUR));
       when(playerRepository.find(playerId)).thenReturn(player);
 
-      DomainException ex = assertThrows(
-            DomainException.class,
+      assertThrows(
+            InsuficientBalanceException.class,
             () -> withdrawUseCase.execute(playerId, 200)
       );
-      assertTrue(ex.getMessage().contains("Solde insuffisant"));
       verify(playerRepository, never()).save(any(Player.class));
    }
 
@@ -85,11 +83,10 @@ class WithdrawUseCaseTest {
       player.recordWithdrawal(new Money(900, Currency.EUR), LocalDate.now());
       when(playerRepository.find(playerId)).thenReturn(player);
 
-      DomainException ex = assertThrows(
-            DomainException.class,
+      assertThrows(
+            DailyWithdrawalExceededException.class,
             () -> withdrawUseCase.execute(playerId, 200)
       );
-      assertTrue(ex.getMessage().contains("Limite journalière dépassée"));
       verify(playerRepository, never()).save(any(Player.class));
    }
 
@@ -107,12 +104,10 @@ class WithdrawUseCaseTest {
 
       when(playerRepository.find(playerId)).thenReturn(player);
 
-      DomainException ex = assertThrows(
-            DomainException.class,
+      assertThrows(
+            MonthlyWithdrawalExceedException.class,
             () -> withdrawUseCase.execute(playerId, 100) // total : 5100€
       );
-
-      assertTrue(ex.getMessage().contains("Limite mensuelle dépassée"));
       verify(playerRepository, never()).save(any(Player.class));
    }
 
@@ -122,11 +117,10 @@ class WithdrawUseCaseTest {
       Player player = new Player(PlayerId.of(playerId), new Money(3000, Currency.EUR));
       when(playerRepository.find(playerId)).thenReturn(player);
 
-      DomainException ex = assertThrows(
-            DomainException.class,
+      assertThrows(
+            UnverifiedKycException.class,
             () -> withdrawUseCase.execute(playerId, 2500)
       );
-      assertTrue(ex.getMessage().contains("vérification KYC requise."));
       verify(playerRepository, never()).save(any(Player.class));
    }
 
@@ -151,11 +145,10 @@ class WithdrawUseCaseTest {
       player.addBonus(new Money(100, Currency.EUR), new Money(50, Currency.EUR));
       when(playerRepository.find(playerId)).thenReturn(player);
 
-      DomainException ex = assertThrows(
-            DomainException.class,
+      assertThrows(
+            UncompletedBonusException.class,
             () -> withdrawUseCase.execute(playerId, 100)
       );
-      assertTrue(ex.getMessage().contains("Bonus actif non complété"));
       verify(playerRepository, never()).save(any(Player.class));
    }
 
