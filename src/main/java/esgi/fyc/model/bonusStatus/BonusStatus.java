@@ -1,6 +1,6 @@
 package esgi.fyc.model.bonusStatus;
 
-import esgi.fyc.exception.UncompletedBonusException;
+import esgi.fyc.model.exception.UncompletedBonusException;
 import esgi.fyc.model.money.Money;
 
 public class BonusStatus {

@@ -1,4 +1,4 @@
-package esgi.fyc.exception;
+package esgi.fyc.model.exception;
 
 public class SuspendedPlayerException extends DomainException {
     public SuspendedPlayerException(String reason) {

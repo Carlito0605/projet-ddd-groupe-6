@@ -1,6 +1,6 @@
 package esgi.fyc.model.player;
 
-import esgi.fyc.exception.InsuficientBalanceException;
+import esgi.fyc.model.exception.InsuficientBalanceException;
 import esgi.fyc.model.bonusStatus.BonusStatus;
 import esgi.fyc.model.kycStatus.KycStatus;
 import esgi.fyc.model.money.Money;

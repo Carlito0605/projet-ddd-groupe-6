@@ -1,4 +1,4 @@
-package esgi.fyc.exception;
+package esgi.fyc.model.exception;
 
 public class InsuficientBalanceException extends DomainException {
    public InsuficientBalanceException() {

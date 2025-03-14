@@ -1,6 +1,6 @@
 package esgi.fyc.model.kycStatus;
 
-import esgi.fyc.exception.UnverifiedKycException;
+import esgi.fyc.model.exception.UnverifiedKycException;
 import esgi.fyc.model.money.Currency;
 import esgi.fyc.model.money.Money;
 

@@ -1,7 +1,7 @@
 package esgi.fyc.model.withdrawalLimits;
 
-import esgi.fyc.exception.DailyWithdrawalExceededException;
-import esgi.fyc.exception.MonthlyWithdrawalExceedException;
+import esgi.fyc.model.exception.DailyWithdrawalExceededException;
+import esgi.fyc.model.exception.MonthlyWithdrawalExceedException;
 import esgi.fyc.model.money.Currency;
 import esgi.fyc.model.money.Money;
 

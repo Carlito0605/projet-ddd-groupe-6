@@ -1,6 +1,6 @@
 package esgi.fyc.model.suspendedstatus;
 
-import esgi.fyc.exception.SuspendedPlayerException;
+import esgi.fyc.model.exception.SuspendedPlayerException;
 
 public class SuspendedStatus {
    private final boolean isSuspended;

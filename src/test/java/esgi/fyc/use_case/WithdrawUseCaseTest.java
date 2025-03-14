@@ -1,6 +1,6 @@
 package esgi.fyc.use_case;
 
-import esgi.fyc.exception.*;
+import esgi.fyc.model.exception.*;
 import esgi.fyc.model.money.Currency;
 import esgi.fyc.model.money.Money;
 import esgi.fyc.model.player.Player;

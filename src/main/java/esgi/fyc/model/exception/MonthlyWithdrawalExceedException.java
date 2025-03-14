@@ -1,4 +1,4 @@
-package esgi.fyc.exception;
+package esgi.fyc.model.exception;
 
 import esgi.fyc.model.money.Money;
 
