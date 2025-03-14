@@ -1,11 +1,11 @@
 package esgi.fyc.model.player;
 
+import esgi.fyc.exception.InsuficientBalanceException;
 import esgi.fyc.model.bonusStatus.BonusStatus;
 import esgi.fyc.model.kycStatus.KycStatus;
 import esgi.fyc.model.money.Money;
 import esgi.fyc.model.suspendedstatus.SuspendedStatus;
 import esgi.fyc.model.withdrawalLimits.WithdrawalLimits;
-import esgi.fyc.use_case.DomainException;
 
 import java.time.LocalDate;
 
@@ -32,7 +32,7 @@ public class Player {
 
    public void withdraw(Money amount) {
       if (balance.isLowerThan(amount)) {
-         throw new DomainException("Solde insuffisant.");
+         throw new InsuficientBalanceException();
       }
       balance = balance.subtract(amount);
    }

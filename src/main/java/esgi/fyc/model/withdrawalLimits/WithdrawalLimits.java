@@ -1,8 +1,9 @@
 package esgi.fyc.model.withdrawalLimits;
 
+import esgi.fyc.exception.DailyWithdrawalExceededException;
+import esgi.fyc.exception.MonthlyWithdrawalExceedException;
 import esgi.fyc.model.money.Currency;
 import esgi.fyc.model.money.Money;
-import esgi.fyc.use_case.DomainException;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -23,13 +24,13 @@ public class WithdrawalLimits {
    public void recordWithdrawal(Money amount, LocalDate date) {
       Money dailyTotal = dailyWithdrawals.getOrDefault(date, Money.ZERO).add(amount);
       if (dailyTotal.isUpperThan(DAILY_LIMIT)) {
-         throw new DomainException("Limite journalière dépassée : " + DAILY_LIMIT);
+         throw new DailyWithdrawalExceededException(DAILY_LIMIT);
       }
 
       String monthKey = date.getYear() + "-" + date.getMonthValue();
       Money monthlyTotal = monthlyWithdrawals.getOrDefault(monthKey, Money.ZERO).add(amount);
       if (monthlyTotal.isUpperThan(MONTHLY_LIMIT)) {
-         throw new DomainException("Limite mensuelle dépassée : " + MONTHLY_LIMIT);
+         throw new MonthlyWithdrawalExceedException(MONTHLY_LIMIT);
       }
 
       dailyWithdrawals.put(date, dailyTotal);

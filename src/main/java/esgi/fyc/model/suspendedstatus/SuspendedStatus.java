@@ -1,6 +1,6 @@
 package esgi.fyc.model.suspendedstatus;
 
-import esgi.fyc.use_case.DomainException;
+import esgi.fyc.exception.SuspendedPlayerException;
 
 public class SuspendedStatus {
    private final boolean isSuspended;
@@ -13,7 +13,7 @@ public class SuspendedStatus {
 
    public void verifyNotSuspended() {
       if (isSuspended)
-         throw new DomainException("Le compte du joueur est suspendu : " + reason);
+         throw new SuspendedPlayerException(reason);
    }
 
    public boolean isSuspended() {

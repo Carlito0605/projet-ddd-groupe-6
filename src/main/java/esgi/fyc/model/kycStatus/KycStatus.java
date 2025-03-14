@@ -1,8 +1,8 @@
 package esgi.fyc.model.kycStatus;
 
+import esgi.fyc.exception.UnverifiedKycException;
 import esgi.fyc.model.money.Currency;
 import esgi.fyc.model.money.Money;
-import esgi.fyc.use_case.DomainException;
 
 public class KycStatus {
    private final boolean isVerified;
@@ -14,7 +14,7 @@ public class KycStatus {
 
    public void verify(Money amount) {
       if (amount.isUpperThan(KYC_THRESHOLD) && !isVerified)
-         throw new DomainException("Retrait supérieur à " + KYC_THRESHOLD + ", vérification KYC requise.");
+         throw new UnverifiedKycException(KYC_THRESHOLD);
    }
 
    public boolean isVerified() {

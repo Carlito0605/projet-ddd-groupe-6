@@ -1,5 +1,6 @@
 package esgi.fyc.use_case;
 
+import esgi.fyc.exception.DomainException;
 import esgi.fyc.model.money.Currency;
 import esgi.fyc.model.money.Money;
 import esgi.fyc.model.player.Player;

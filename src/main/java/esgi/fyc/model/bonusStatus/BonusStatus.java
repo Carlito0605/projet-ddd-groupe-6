@@ -1,7 +1,7 @@
 package esgi.fyc.model.bonusStatus;
 
+import esgi.fyc.exception.UncompletedBonusException;
 import esgi.fyc.model.money.Money;
-import esgi.fyc.use_case.DomainException;
 
 public class BonusStatus {
    private final Money bonusBalance;
@@ -14,7 +14,7 @@ public class BonusStatus {
 
    public void verifyBonusConditions() {
       if (bonusBalance.isPositive() && bonusWageringLeft.isPositive())
-         throw new DomainException("Bonus actif non complété : " + bonusWageringLeft + " à miser.");
+         throw new UncompletedBonusException(bonusWageringLeft);
    }
 
    public BonusStatus reduceWagering(Money amount) {

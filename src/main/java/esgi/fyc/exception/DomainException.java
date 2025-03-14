@@ -1,4 +1,4 @@
-package esgi.fyc.use_case;
+package esgi.fyc.exception;
 
 public class DomainException extends RuntimeException {
    public DomainException(String message) {
